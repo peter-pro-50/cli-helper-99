@@ -1,23 +1,29 @@
 import time
+import random
 
-def measure_time(func):
-    def wrapper(*args, **kwargs):
-        start_time = time.time()
-        result = func(*args, **kwargs)
-        end_time = time.time()
-        print(f"Execution time of {func.__name__}: {end_time - start_time:.6f} seconds")
-        return result
-    return wrapper
+def retry_operation(operation, retries=5, delay=2, backoff=2):
+    """Attempts to execute a given operation, retrying on failure."""
+    for attempt in range(retries):
+        try:
+            return operation()
+        except Exception as e:
+            if attempt < retries - 1:
+                wait_time = delay * (backoff ** attempt)
+                print(f'Attempt {attempt + 1} failed: {e}. Retrying in {wait_time:.1f} seconds...')
+                time.sleep(wait_time)
+            else:
+                print(f'All {retries} attempts failed.')
+                raise
 
-@measure_time
-def optimized_function(data):
-    result = []
-    unique_data = set(data)
-    for item in unique_data:
-        if item % 2 == 0:
-            result.append(item ** 2)
-    return result
-
+# Example usage:
 if __name__ == '__main__':
-    sample_data = range(1000000)
-    print(optimized_function(sample_data))
+    def unstable_network_call():
+        if random.random() < 0.7:
+            raise ValueError('Network error!')
+        return 'Success!'
+
+    try:
+        result = retry_operation(unstable_network_call)
+        print(result)
+    except Exception as e:
+        print(f'Final error: {e}')
