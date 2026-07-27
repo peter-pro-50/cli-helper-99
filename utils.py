@@ -1,28 +1,20 @@
 import time
 import requests
-from functools import wraps
 
-def retry(max_attempts=3, delay=2):
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            attempts = 0
-            while attempts < max_attempts:
-                try:
-                    return func(*args, **kwargs)
-                except requests.exceptions.RequestException as e:
-                    attempts += 1
-                    print(f"Attempt {attempts} failed: {e}")
-                    if attempts < max_attempts:
-                        time.sleep(delay)
-                    else:
-                        print("Max attempts reached. Raising exception.")
-                        raise
-        return wrapper
-    return decorator
+# Exponential backoff intervals in seconds
+RETRY_INTERVALS = [1, 2, 4, 8, 16]
 
-@retry(max_attempts=5, delay=1)
-def fetch_data(url):
-    response = requests.get(url)
-    response.raise_for_status()
-    return response.json()
+def retry_request(url, max_retries=5):
+    attempt = 0
+    while attempt < max_retries:
+        try:
+            response = requests.get(url)
+            # Check for HTTP errors
+            response.raise_for_status()
+            return response.json()
+        except (requests.HTTPError, requests.ConnectionError) as e:
+            print(f'Attempt {attempt + 1} failed: {e}')
+            if attempt < len(RETRY_INTERVALS):
+                time.sleep(RETRY_INTERVALS[attempt])
+            attempt += 1
+    raise Exception(f'Request to {url} failed after {max_retries} attempts')
