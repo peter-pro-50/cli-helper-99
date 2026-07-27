@@ -1,25 +1,16 @@
-import re
+import json
+from validators import validate_user_input
 
-class DataProcessor:
-    def __init__(self):
-        self.regex_pattern = re.compile(r'^[a-zA-Z0-9_]{3,20}$')
-
-    def validate_input(self, user_input):
-        if self.regex_pattern.match(user_input):
-            return True
-        raise ValueError('Input must be alphanumeric and 3-20 characters long')
-
-    def process_data(self, inputs):
-        validated_inputs = []
-        for user_input in inputs:
-            try:
-                self.validate_input(user_input)
-                validated_inputs.append(user_input)
-            except ValueError as e:
-                print(f'Error: {e}')  
-        return validated_inputs
+def process_data():
+    while True:
+        user_input = input('Enter data (or type exit to quit): ')
+        if user_input.lower() == 'exit':
+            break
+        if not validate_user_input(user_input):
+            print('Invalid input, please try again.')
+            continue
+        processed_data = json.loads(user_input)
+        print(f'Processed Data: {processed_data}')
 
 if __name__ == '__main__':
-    dp = DataProcessor()
-    sample_inputs = ['validInput1', '123', 'invalid-input!', 'short', 'a'*21]
-    print(dp.process_data(sample_inputs))
+    process_data()
