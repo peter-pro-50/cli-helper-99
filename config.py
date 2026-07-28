@@ -1,19 +1,22 @@
-import json
 import os
+import logging
+from logging.handlers import RotatingFileHandler
 
-DEFAULT_CONFIG = {
-    'host': 'localhost',
-    'port': 8080,
-    'debug': False,
-}
+def setup_logger(name, log_file, level=logging.INFO):
+    if not os.path.exists(os.path.dirname(log_file)):
+        os.makedirs(os.path.dirname(log_file))
 
-def load_config(filename='config.json'):
-    if os.path.exists(filename):
-        with open(filename, 'r') as file:
-            config = json.load(file)
-            return {**DEFAULT_CONFIG, **config}
-    return DEFAULT_CONFIG
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler = RotatingFileHandler(log_file, maxBytes=5*1024*1024, backupCount=3)
+    handler.setFormatter(formatter)
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    logger.addHandler(handler)
+    return logger
 
+# Example usage
 if __name__ == '__main__':
-    config = load_config()
-    print(config)
+    logger = setup_logger('MyLogger', 'logs/myapp.log')
+    logger.info('Logger is set up!')
+    logger.error('This is an error message!')
+    logger.debug('Debugging information.')
