@@ -1,31 +1,31 @@
-import os
-import sys
+import time
 
-class CLIHelper:
+class PerformanceTracker:
     def __init__(self):
-        self.commands = {}
+        self.execution_times = []
 
-    def add_command(self, name, func):
-        self.commands[name] = func
+    def track_time(self, func):
+        def wrapper(*args, **kwargs):
+            start_time = time.perf_counter()
+            result = func(*args, **kwargs)
+            end_time = time.perf_counter()
+            self.execution_times.append(end_time - start_time)
+            return result
+        return wrapper
 
-    def run(self, command_name, *args):
-        if command_name in self.commands:
-            return self.commands[command_name](*args)
-        else:
-            print(f"Command '{command_name}' not found.")
+    def average_time(self):
+        return sum(self.execution_times) / len(self.execution_times) if self.execution_times else 0
 
-def greet(name):
-    print(f"Hello, {name}!")
+performance_tracker = PerformanceTracker()
 
-def farewell(name):
-    print(f"Goodbye, {name}!")
+@performance_tracker.track_time
+def sample_heavy_computation(n):
+    total = 0
+    for i in range(n):
+        total += (i ** 2) * (i ** 0.5)
+    return total
 
 if __name__ == '__main__':
-    cli_helper = CLIHelper()
-    cli_helper.add_command('greet', greet)
-    cli_helper.add_command('farewell', farewell)
-
-    if len(sys.argv) > 1:
-        cli_helper.run(sys.argv[1], *sys.argv[2:])
-    else:
-        print('Please provide a command.')
+    for _ in range(10):
+        print(sample_heavy_computation(10000))
+    print("Average Execution Time:", performance_tracker.average_time())
