@@ -1,33 +1,33 @@
-class CustomError(Exception):
-    """Base class for exceptions in this module."""
+import time
+import random
+import requests
+
+class NetworkError(Exception):
     pass
 
-class ValidationError(CustomError):
-    """Raised when validation fails."""
-    def __init__(self, message):
-        super().__init__(message)
-        self.message = message
+class Retry:
+    def __init__(self, retries=3, backoff=2, error_cls=NetworkError):
+        self.retries = retries
+        self.backoff = backoff
+        self.error_cls = error_cls
 
-class ProcessingError(CustomError):
-    """Raised when an error occurs during processing."""
-    def __init__(self, message):
-        super().__init__(message)
-        self.message = message
+    def __call__(self, func):
+        def wrapper(*args, **kwargs):
+            last_exception = None
+            for attempt in range(self.retries):
+                try:
+                    return func(*args, **kwargs)
+                except self.error_cls as e:
+                    last_exception = e
+                    sleep_time = self.backoff ** attempt
+                    time.sleep(sleep_time)
+                    print(f'Retry {attempt + 1}/{self.retries} after {sleep_time} seconds')
+            raise last_exception
+        return wrapper
 
-class ConfigurationError(CustomError):
-    """Raised when there is a configuration issue."""
-    def __init__(self, message):
-        super().__init__(message)
-        self.message = message
-
-class NotFoundError(CustomError):
-    """Raised when an expected item is not found."""
-    def __init__(self, message):
-        super().__init__(message)
-        self.message = message
-
-class TimeoutError(CustomError):
-    """Raised when an operation times out."""
-    def __init__(self, message):
-        super().__init__(message)
-        self.message = message
+@Retry(retries=5)
+def fetch_data(url):
+    response = requests.get(url)
+    if response.status_code != 200:
+        raise NetworkError(f'Failed to fetch data from {url}')
+    return response.json()
