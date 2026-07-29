@@ -1,25 +1,23 @@
 import re
 
-def validate_input(user_input):
-    if not isinstance(user_input, str):
-        raise ValueError("Input must be a string.")
-    if len(user_input) == 0:
-        raise ValueError("Input cannot be empty.")
-    if not re.match("^[a-zA-Z0-9_]*$, user_input):
-        raise ValueError("Input can only contain alphanumeric characters and underscores.")
-    return True
+def validate_email(email: str) -> bool:
+    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(email_regex, email) is not None
 
 
-def main_processing_loop():
-    while True:
-        try:
-            user_input = input("Enter your input (or type 'exit' to quit): ")
-            if user_input.lower() == 'exit':
-                break
-            validate_input(user_input)
-            print(f"Valid input received: {user_input}")
-        except ValueError as e:
-            print(e)
+def validate_phone(phone: str) -> bool:
+    phone_regex = r'^(\+\d{1,3})?\d{10}$'
+    return re.match(phone_regex, phone) is not None
 
-if __name__ == '__main__':
-    main_processing_loop()
+
+def validate_url(url: str) -> bool:
+    url_regex = r'^(https?://)?(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(/\S*)?$'
+    return re.match(url_regex, url) is not None
+
+
+def validate_integer(value: str) -> bool:
+    return value.isdigit()
+
+
+def validate_boolean(value: str) -> bool:
+    return value.lower() in ['true', 'false']
