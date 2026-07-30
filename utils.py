@@ -1,20 +1,32 @@
 import time
-import requests
+from functools import wraps
 
-# Exponential backoff intervals in seconds
-RETRY_INTERVALS = [1, 2, 4, 8, 16]
 
-def retry_request(url, max_retries=5):
-    attempt = 0
-    while attempt < max_retries:
-        try:
-            response = requests.get(url)
-            # Check for HTTP errors
-            response.raise_for_status()
-            return response.json()
-        except (requests.HTTPError, requests.ConnectionError) as e:
-            print(f'Attempt {attempt + 1} failed: {e}')
-            if attempt < len(RETRY_INTERVALS):
-                time.sleep(RETRY_INTERVALS[attempt])
-            attempt += 1
-    raise Exception(f'Request to {url} failed after {max_retries} attempts')
+def benchmark(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.perf_counter()
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        elapsed = end_time - start_time
+        print(f"{func.__name__} executed in {elapsed:.4f} seconds")
+        return result
+    return wrapper
+
+
+@benchmark
+def expensive_computation(n):
+    total = 0
+    for i in range(n):
+        total += sum(j * j for j in range(1000))  # Simulates a heavy computation
+    return total
+
+
+@benchmark
+def optimized_computation(n):
+    return n * (999500000)  # Using the formula for sum of squares directly
+
+
+if __name__ == "__main__":
+    print(expensive_computation(5))
+    print(optimized_computation(5))
