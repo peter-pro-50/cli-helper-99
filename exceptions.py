@@ -1,33 +1,39 @@
-import time
-import random
-import requests
+class CustomError(Exception):
+    def __init__(self, message, errors=None):
+        super().__init__(message)
+        self.errors = errors
 
-class NetworkError(Exception):
+class NotFoundError(CustomError):
     pass
 
-class Retry:
-    def __init__(self, retries=3, backoff=2, error_cls=NetworkError):
-        self.retries = retries
-        self.backoff = backoff
-        self.error_cls = error_cls
+class ValidationError(CustomError):
+    def __init__(self, message, field):
+        super().__init__(message)
+        self.field = field
 
-    def __call__(self, func):
-        def wrapper(*args, **kwargs):
-            last_exception = None
-            for attempt in range(self.retries):
-                try:
-                    return func(*args, **kwargs)
-                except self.error_cls as e:
-                    last_exception = e
-                    sleep_time = self.backoff ** attempt
-                    time.sleep(sleep_time)
-                    print(f'Retry {attempt + 1}/{self.retries} after {sleep_time} seconds')
-            raise last_exception
-        return wrapper
+class DatabaseError(CustomError):
+    pass
 
-@Retry(retries=5)
-def fetch_data(url):
-    response = requests.get(url)
-    if response.status_code != 200:
-        raise NetworkError(f'Failed to fetch data from {url}')
-    return response.json()
+
+def raise_if_none(value, message):
+    if value is None:
+        raise CustomError(message)
+
+
+def handle_exception(exc):
+    if isinstance(exc, CustomError):
+        print(f'Custom error occurred: {exc}')
+    else:
+        print('An unexpected error occurred:', exc)
+
+
+def validate_age(age):
+    if age < 0:
+        raise ValidationError('Age cannot be negative', 'age')
+    return True
+
+
+def find_item(item_list, item):
+    if item not in item_list:
+        raise NotFoundError('Item not found in the list')
+    return item_list[item_list.index(item)]
