@@ -1,31 +1,43 @@
-import time
+from typing import List, Dict, Any
 
-class PerformanceTracker:
-    def __init__(self):
-        self.execution_times = []
 
-    def track_time(self, func):
-        def wrapper(*args, **kwargs):
-            start_time = time.perf_counter()
-            result = func(*args, **kwargs)
-            end_time = time.perf_counter()
-            self.execution_times.append(end_time - start_time)
-            return result
-        return wrapper
+def process_data(data: List[Dict[str, Any]]) -> List[str]:
+    """
+    Process a list of dictionaries and extract the 'name' key.
 
-    def average_time(self):
-        return sum(self.execution_times) / len(self.execution_times) if self.execution_times else 0
+    Args:
+        data (List[Dict[str, Any]]): A list of dictionaries containing data.
 
-performance_tracker = PerformanceTracker()
+    Returns:
+        List[str]: A list of names extracted from the dictionaries.
+    """
+    names = []
+    for item in data:
+        name = item.get('name')
+        if name:
+            names.append(name)
+    return names
 
-@performance_tracker.track_time
-def sample_heavy_computation(n):
-    total = 0
-    for i in range(n):
-        total += (i ** 2) * (i ** 0.5)
-    return total
+
+def calculate_average(values: List[float]) -> float:
+    """
+    Calculate the average of a list of numbers.
+
+    Args:
+        values (List[float]): A list of numeric values.
+
+    Returns:
+        float: The average of the provided values.
+    """
+    if not values:
+        return 0.0
+    return sum(values) / len(values)
+
 
 if __name__ == '__main__':
-    for _ in range(10):
-        print(sample_heavy_computation(10000))
-    print("Average Execution Time:", performance_tracker.average_time())
+    sample_data = [{'name': 'Alice'}, {'name': 'Bob'}, {'age': 30}, {'name': 'Eve'}]
+    names = process_data(sample_data)
+    print(names)
+
+    average = calculate_average([10.0, 20.0, 30.0])
+    print(f'Average: {average}')
