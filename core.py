@@ -1,43 +1,35 @@
-from typing import List, Dict, Any
+import json
+import sys
 
+class ErrorHandling:
+    def __init__(self):
+        self.error_log = []
 
-def process_data(data: List[Dict[str, Any]]) -> List[str]:
-    """
-    Process a list of dictionaries and extract the 'name' key.
+    def log_error(self, message):
+        self.error_log.append(message)
+        print(f"Error logged: {message}")
 
-    Args:
-        data (List[Dict[str, Any]]): A list of dictionaries containing data.
+    def handle_edge_cases(self, value):
+        if not isinstance(value, (int, float)):
+            self.log_error("Invalid input type, must be int or float")
+            return None
+        elif value < 0:
+            self.log_error("Negative value encountered")
+            return 0
+        return value
 
-    Returns:
-        List[str]: A list of names extracted from the dictionaries.
-    """
-    names = []
+def process_data(data):
+    handler = ErrorHandling()
+    processed_data = []
+    
     for item in data:
-        name = item.get('name')
-        if name:
-            names.append(name)
-    return names
-
-
-def calculate_average(values: List[float]) -> float:
-    """
-    Calculate the average of a list of numbers.
-
-    Args:
-        values (List[float]): A list of numeric values.
-
-    Returns:
-        float: The average of the provided values.
-    """
-    if not values:
-        return 0.0
-    return sum(values) / len(values)
-
+        processed_item = handler.handle_edge_cases(item)
+        if processed_item is not None:
+            processed_data.append(processed_item)
+    
+    return processed_data
 
 if __name__ == '__main__':
-    sample_data = [{'name': 'Alice'}, {'name': 'Bob'}, {'age': 30}, {'name': 'Eve'}]
-    names = process_data(sample_data)
-    print(names)
-
-    average = calculate_average([10.0, 20.0, 30.0])
-    print(f'Average: {average}')
+    input_data = json.loads(sys.argv[1])
+    result = process_data(input_data)
+    print(json.dumps(result))
