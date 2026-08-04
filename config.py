@@ -1,22 +1,30 @@
+import json
 import os
-import logging
-from logging.handlers import RotatingFileHandler
 
-def setup_logger(name, log_file, level=logging.INFO):
-    if not os.path.exists(os.path.dirname(log_file)):
-        os.makedirs(os.path.dirname(log_file))
+class ConfigLoader:
+    def __init__(self, default_config=None):
+        self.default_config = default_config if default_config else {}
+        self.user_config = {}
 
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler = RotatingFileHandler(log_file, maxBytes=5*1024*1024, backupCount=3)
-    handler.setFormatter(formatter)
-    logger = logging.getLogger(name)
-    logger.setLevel(level)
-    logger.addHandler(handler)
-    return logger
+    def load_config(self, config_path):
+        if os.path.exists(config_path):
+            with open(config_path, 'r') as config_file:
+                self.user_config = json.load(config_file)
+        else:
+            print(f'Config file {config_path} not found. Using defaults.')
 
-# Example usage
-if __name__ == '__main__':
-    logger = setup_logger('MyLogger', 'logs/myapp.log')
-    logger.info('Logger is set up!')
-    logger.error('This is an error message!')
-    logger.debug('Debugging information.')
+    def get_config(self):
+        return {**self.default_config, **self.user_config}
+
+# Example default config
+default_settings = {
+    'logging_level': 'INFO',
+    'max_connections': 10,
+    'timeout': 30
+}
+
+# Usage
+config_loader = ConfigLoader(default_settings)
+config_loader.load_config('config.json')
+final_config = config_loader.get_config()
+print(final_config)
