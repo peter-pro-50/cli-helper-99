@@ -1,35 +1,28 @@
-import json
-import sys
+def main_loop():
+    while True:
+        user_input = input('Enter a command: ')
+        if validate_input(user_input):
+            process_command(user_input)
+        else:
+            print('Invalid input. Please try again.')
 
-class ErrorHandling:
-    def __init__(self):
-        self.error_log = []
 
-    def log_error(self, message):
-        self.error_log.append(message)
-        print(f"Error logged: {message}")
+def validate_input(user_input):
+    valid_commands = ['start', 'stop', 'status', 'exit']
+    return user_input in valid_commands
 
-    def handle_edge_cases(self, value):
-        if not isinstance(value, (int, float)):
-            self.log_error("Invalid input type, must be int or float")
-            return None
-        elif value < 0:
-            self.log_error("Negative value encountered")
-            return 0
-        return value
 
-def process_data(data):
-    handler = ErrorHandling()
-    processed_data = []
-    
-    for item in data:
-        processed_item = handler.handle_edge_cases(item)
-        if processed_item is not None:
-            processed_data.append(processed_item)
-    
-    return processed_data
+def process_command(command):
+    if command == 'start':
+        print('Starting...')
+    elif command == 'stop':
+        print('Stopping...')
+    elif command == 'status':
+        print('Current status...')
+    elif command == 'exit':
+        print('Exiting...')
+        exit(0)
+
 
 if __name__ == '__main__':
-    input_data = json.loads(sys.argv[1])
-    result = process_data(input_data)
-    print(json.dumps(result))
+    main_loop()
