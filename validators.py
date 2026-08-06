@@ -1,31 +1,60 @@
-import re
+from typing import Any, Dict, Union
 
-def validate_integer(value):
-    if not isinstance(value, int):
-        raise ValueError(f'Expected integer but got {type(value).__name__}')
-    return True
+def validate_integer(value: Any) -> Union[int, None]:
+    """
+    Validates if the provided value is an integer.
 
+    Args:
+        value (Any): The value to validate.
 
-def validate_non_empty_string(value):
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError('Expected non-empty string')
-    return True
-
-
-def validate_email(value):
-    email_regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
-    if not re.match(email_regex, value):
-        raise ValueError('Invalid email format')
-    return True
+    Returns:
+        Union[int, None]: Returns the integer if valid, otherwise None.
+    """
+    if isinstance(value, int):
+        return value
+    return None
 
 
-def validate_positive_float(value):
-    if not isinstance(value, float) or value <= 0:
-        raise ValueError('Expected positive float')
-    return True
+def validate_string(value: Any) -> Union[str, None]:
+    """
+    Validates if the provided value is a string.
+
+    Args:
+        value (Any): The value to validate.
+
+    Returns:
+        Union[str, None]: Returns the string if valid, otherwise None.
+    """
+    if isinstance(value, str):
+        return value
+    return None
 
 
-def validate_list_of_strings(value):
-    if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
-        raise ValueError('Expected a list of strings')
-    return True
+def validate_dict(value: Any) -> Union[Dict[str, Any], None]:
+    """
+    Validates if the provided value is a dictionary.
+
+    Args:
+        value (Any): The value to validate.
+
+    Returns:
+        Union[Dict[str, Any], None]: Returns the dictionary if valid, otherwise None.
+    """
+    if isinstance(value, dict):
+        return value
+    return None
+
+
+def validate_float(value: Any) -> Union[float, None]:
+    """
+    Validates if the provided value is a float.
+
+    Args:
+        value (Any): The value to validate.
+
+    Returns:
+        Union[float, None]: Returns the float if valid, otherwise None.
+    """
+    if isinstance(value, float):
+        return value
+    return None
