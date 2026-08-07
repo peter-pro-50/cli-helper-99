@@ -1,31 +1,25 @@
 class CustomError(Exception):
-    """Base class for other exceptions."""
-    pass
+    def __init__(self, message):
+        super().__init__(message)
+        self.message = message
 
 class NotFoundError(CustomError):
-    """Exception raised for not found errors."""
     def __init__(self, resource):
+        super().__init__(f'Resource not found: {resource}')
         self.resource = resource
-        self.message = f'{resource} not found'
-        super().__init__(self.message)
 
-class ValidationError(CustomError):
-    """Exception raised for validation errors."""
-    def __init__(self, errors):
-        self.errors = errors
-        self.message = f'Validation failed: {errors}'
-        super().__init__(self.message)
+class InvalidInputError(CustomError):
+    def __init__(self, input_value, reason):
+        super().__init__(f'Invalid input: {input_value}. Reason: {reason}')
+        self.input_value = input_value
+        self.reason = reason
 
-class ConfigurationError(CustomError):
-    """Exception raised for configuration-related errors."""
-    def __init__(self, config_item):
-        self.config_item = config_item
-        self.message = f'Invalid configuration for {config_item}'
-        super().__init__(self.message)
+class DatabaseConnectionError(CustomError):
+    def __init__(self, db_url):
+        super().__init__(f'Failed to connect to database at: {db_url}')
+        self.db_url = db_url
 
-class DatabaseError(CustomError):
-    """Exception raised for database errors."""
-    def __init__(self, db_action):
-        self.db_action = db_action
-        self.message = f'Database error during {db_action}'
-        super().__init__(self.message)
+class TimeoutError(CustomError):
+    def __init__(self, operation):
+        super().__init__(f'Timeout occurred during: {operation}')
+        self.operation = operation
