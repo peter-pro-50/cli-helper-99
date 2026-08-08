@@ -1,25 +1,39 @@
 class CustomError(Exception):
-    def __init__(self, message):
-        super().__init__(message)
-        self.message = message
+    """Base class for other exceptions."""
+    pass
 
-class NotFoundError(CustomError):
-    def __init__(self, resource):
-        super().__init__(f'Resource not found: {resource}')
-        self.resource = resource
+class ValueTooSmallError(CustomError):
+    """Raised when the input value is too small."""
+    def __init__(self, value):
+        self.value = value
+        super().__init__(f'Value {value} is too small')
+
+class ValueTooLargeError(CustomError):
+    """Raised when the input value is too large."""
+    def __init__(self, value):
+        self.value = value
+        super().__init__(f'Value {value} is too large')
 
 class InvalidInputError(CustomError):
-    def __init__(self, input_value, reason):
-        super().__init__(f'Invalid input: {input_value}. Reason: {reason}')
-        self.input_value = input_value
-        self.reason = reason
+    """Raised when the input is invalid."""
+    def __init__(self, message):
+        self.message = message
+        super().__init__(message)
 
-class DatabaseConnectionError(CustomError):
-    def __init__(self, db_url):
-        super().__init__(f'Failed to connect to database at: {db_url}')
-        self.db_url = db_url
+def process_value(value):
+    if not isinstance(value, (int, float)):
+        raise InvalidInputError('Input must be a number')
+    if value < 10:
+        raise ValueTooSmallError(value)
+    if value > 100:
+        raise ValueTooLargeError(value)
+    return value * 2
 
-class TimeoutError(CustomError):
-    def __init__(self, operation):
-        super().__init__(f'Timeout occurred during: {operation}')
-        self.operation = operation
+if __name__ == '__main__':
+    inputs = [5, 15, 200, 'abc']
+    for inp in inputs:
+        try:
+            result = process_value(inp)
+            print(f'Result: {result}')
+        except CustomError as e:
+            print(f'Error: {e}'
