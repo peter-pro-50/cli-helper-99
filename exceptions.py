@@ -1,39 +1,28 @@
 class CustomError(Exception):
     """Base class for other exceptions."""
-    pass
-
-class ValueTooSmallError(CustomError):
-    """Raised when the input value is too small."""
-    def __init__(self, value):
-        self.value = value
-        super().__init__(f'Value {value} is too small')
-
-class ValueTooLargeError(CustomError):
-    """Raised when the input value is too large."""
-    def __init__(self, value):
-        self.value = value
-        super().__init__(f'Value {value} is too large')
-
-class InvalidInputError(CustomError):
-    """Raised when the input is invalid."""
     def __init__(self, message):
+        super().__init__(message)
         self.message = message
+
+class ValidationError(CustomError):
+    """Raised when a validation check fails."""
+    def __init__(self, message):
         super().__init__(message)
 
-def process_value(value):
-    if not isinstance(value, (int, float)):
-        raise InvalidInputError('Input must be a number')
-    if value < 10:
-        raise ValueTooSmallError(value)
-    if value > 100:
-        raise ValueTooLargeError(value)
-    return value * 2
+class NotFoundError(CustomError):
+    """Raised when a resource is not found."""
+    def __init__(self, resource):
+        message = f'{resource} not found.'
+        super().__init__(message)
 
-if __name__ == '__main__':
-    inputs = [5, 15, 200, 'abc']
-    for inp in inputs:
-        try:
-            result = process_value(inp)
-            print(f'Result: {result}')
-        except CustomError as e:
-            print(f'Error: {e}'
+class PermissionDeniedError(CustomError):
+    """Raised when permission is denied."""
+    def __init__(self, action):
+        message = f'Permission denied for action: {action}'
+        super().__init__(message)
+
+class ConfigurationError(CustomError):
+    """Raised for configuration issues."""
+    def __init__(self, setting):
+        message = f'Configuration issue with setting: {setting}'
+        super().__init__(message)
