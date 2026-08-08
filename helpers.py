@@ -1,47 +1,38 @@
-import re
+import os
+import json
+import shutil
+from typing import Any, Dict
 
-class InputValidationError(Exception):
-    pass
-
-class InputValidator:
-    def __init__(self, expected_type: type):
-        self.expected_type = expected_type
-
-    def validate(self, user_input: str) -> None:
-        if not isinstance(user_input, str):
-            raise InputValidationError('Input must be a string')
-        if self.expected_type == int:
-            self._validate_int(user_input)
-        elif self.expected_type == float:
-            self._validate_float(user_input)
-        elif self.expected_type == str:
-            self._validate_string(user_input)
-        else:
-            raise InputValidationError('Unsupported type for validation')
-
-    def _validate_int(self, user_input: str) -> None:
-        if not re.fullmatch(r'-?\d+', user_input):
-            raise InputValidationError('Input must be a valid integer')
-
-    def _validate_float(self, user_input: str) -> None:
-        if not re.fullmatch(r'-?\d+(\.\d+)?', user_input):
-            raise InputValidationError('Input must be a valid float')
-
-    def _validate_string(self, user_input: str) -> None:
-        if len(user_input) == 0:
-            raise InputValidationError('Input cannot be empty')
+def read_json(file_path: str) -> Dict[str, Any]:
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"{file_path} does not exist")
+    with open(file_path, 'r') as file:
+        return json.load(file)
 
 
-def main_processing_loop():
-    validator = InputValidator(int)
-    while True:
-        user_input = input('Enter a number: ')
-        try:
-            validator.validate(user_input)
-            print(f'Validated input: {user_input}')
-            break
-        except InputValidationError as e:
-            print(e)
+def write_json(file_path: str, data: Dict[str, Any]) -> None:
+    with open(file_path, 'w') as file:
+        json.dump(data, file, indent=4)
 
-if __name__ == '__main__':
-    main_processing_loop()
+
+def copy_file(src: str, dst: str) -> None:
+    if not os.path.isfile(src):
+        raise FileNotFoundError(f"{src} does not exist")
+    shutil.copy2(src, dst)
+
+
+def ensure_directory_exists(path: str) -> None:
+    os.makedirs(path, exist_ok=True)
+
+
+def flatten_nested_dict(nested_dict: Dict) -> Dict[str, Any]:
+    flat_dict = {}
+    def flatten(x: Dict, parent_key: str = ''):
+        for k, v in x.items():
+            new_key = f"{parent_key}.{k}" if parent_key else k
+            if isinstance(v, dict):
+                flatten(v, new_key)
+            else:
+                flat_dict[new_key] = v
+    flatten(nested_dict)
+    return flat_dict
