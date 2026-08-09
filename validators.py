@@ -1,25 +1,21 @@
 import re
 
-def validate_email(email: str) -> bool:
+def is_valid_email(email: str) -> bool:
     email_regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
     return re.match(email_regex, email) is not None
 
-def validate_phone(phone: str) -> bool:
-    phone_regex = r'^\+?1?\d{9,15}$'
+def is_valid_phone(phone: str) -> bool:
+    phone_regex = r'^(\+\d{1,3}[- ]?)?\d{10}$'
     return re.match(phone_regex, phone) is not None
 
-def validate_url(url: str) -> bool:
-    url_regex = r'^(http|https)://[a-zA-Z0-9.-]+(?:\.[a-zA-Z]{2,})+(/\S*)?$'
-    return re.match(url_regex, url) is not None
+def validate_user_info(email: str, phone: str) -> dict:
+    validations = {
+        'email': is_valid_email(email),
+        'phone': is_valid_phone(phone),
+    }
+    return validations
 
-def validate_password(password: str) -> bool:
-    return (len(password) >= 8 and 
-            any(char.isdigit() for char in password) and 
-            any(char.isupper() for char in password) and 
-            any(char.islower() for char in password))
-
-# Example usage: 
-# print(validate_email('test@example.com'))  # expected: True
-# print(validate_phone('+1234567890'))      # expected: True
-# print(validate_url('https://example.com')) # expected: True
-# print(validate_password('StrongP@ss1'))    # expected: True
+if __name__ == '__main__':
+    user_email = 'test@example.com'
+    user_phone = '+1234567890'
+    print(validate_user_info(user_email, user_phone))
