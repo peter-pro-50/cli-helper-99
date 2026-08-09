@@ -1,32 +1,25 @@
-# core.py
-import os
-import json
+import time
+import requests
+from requests.exceptions import RequestException
 
-class FileManager:
-    def __init__(self, base_path):
-        self.base_path = base_path
+def retry_request(url, max_retries=3, backoff_factor=1):
+    retries = 0
+    while retries < max_retries:
+        try:
+            response = requests.get(url)
+            response.raise_for_status()  # Raise an error for bad responses
+            return response.json()  # Assuming the response is JSON
+        except RequestException as e:
+            retries += 1
+            wait = backoff_factor * (2 ** (retries - 1))
+            print(f'Request failed: {e}. Retrying in {wait} seconds...')
+            time.sleep(wait)
+    raise ConnectionError(f'Failed to retrieve data after {max_retries} attempts.')
 
-    def read_file(self, filename):
-        full_path = os.path.join(self.base_path, filename)
-        with open(full_path, 'r') as file:
-            return file.read()
-
-    def write_file(self, filename, data):
-        full_path = os.path.join(self.base_path, filename)
-        with open(full_path, 'w') as file:
-            file.write(data)
-
-class JsonFileManager(FileManager):
-    def read_json(self, filename):
-        content = self.read_file(filename)
-        return json.loads(content)
-
-    def write_json(self, filename, data_dict):
-        json_data = json.dumps(data_dict, indent=4)
-        self.write_file(filename, json_data)
-
+# Example usage:
 if __name__ == '__main__':
-    fm = JsonFileManager('./data')
-    fm.write_json('sample.json', {'key': 'value'})
-    json_data = fm.read_json('sample.json')
-    print(json_data)
+    try:
+        data = retry_request('https://api.example.com/data')
+        print('Data retrieved:', data)
+    except ConnectionError as e:
+        print(e)
