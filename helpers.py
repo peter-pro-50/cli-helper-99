@@ -1,53 +1,64 @@
 from typing import List, Dict, Any
 
 
-def flatten_dict(nested_dict: Dict[str, Any], parent_key: str = '', sep: str = '.') -> Dict[str, Any]:
+def flatten_list(nested_list: List[List[Any]]) -> List[Any]:
     """
-    Flattens a nested dictionary into a single level dictionary.
+    Flattens a nested list of arbitrary depth into a single list.
 
     Args:
-        nested_dict (Dict[str, Any]): The dictionary to flatten.
-        parent_key (str, optional): The base key for the flattened keys. Defaults to ''.
-        sep (str, optional): The separator to use between keys. Defaults to '.'.
+        nested_list (List[List[Any]]): A list potentially containing nested lists.
 
     Returns:
-        Dict[str, Any]: A flattened dictionary.
+        List[Any]: A flattened list containing all elements.
     """
-    items = []
-    for k, v in nested_dict.items():
-        new_key = f'{parent_key}{sep}{k}' if parent_key else k
-        if isinstance(v, dict):
-            items.extend(flatten_dict(v, new_key, sep=sep).items())
+    flat_list: List[Any] = []
+    for item in nested_list:
+        if isinstance(item, list):
+            flat_list.extend(flatten_list(item))
         else:
-            items.append((new_key, v))
-    return dict(items)
+            flat_list.append(item)
+    return flat_list
 
 
-def list_to_dict(lst: List[str], key: str) -> Dict[str, str]:
+def merge_dicts(dicts: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
-    Converts a list of strings into a dictionary using the specified key.
+    Merges a list of dictionaries into a single dictionary.
 
     Args:
-        lst (List[str]): The list to convert.
-        key (str): The key to use for the dictionary.
+        dicts (List[Dict[str, Any]]): A list of dictionaries to merge.
 
     Returns:
-        Dict[str, str]: A dictionary with the specified key and list values.
+        Dict[str, Any]: A dictionary containing all key-value pairs.
     """
-    return {item: key for item in lst}
+    merged: Dict[str, Any] = {}
+    for d in dicts:
+        merged.update(d)
+    return merged
 
 
-def merge_dicts(dict1: Dict[str, Any], dict2: Dict[str, Any]) -> Dict[str, Any]:
+def read_json_file(file_path: str) -> Dict[str, Any]:
     """
-    Merges two dictionaries into one. If both dictionaries have the same key, the value from dict2 takes precedence.
+    Reads a JSON file and returns its content as a dictionary.
 
     Args:
-        dict1 (Dict[str, Any]): The first dictionary.
-        dict2 (Dict[str, Any]): The second dictionary.
+        file_path (str): The path to the JSON file.
 
     Returns:
-        Dict[str, Any]: The merged dictionary.
+        Dict[str, Any]: The contents of the JSON file.
     """
-    result = dict(dict1)  # Make a copy of dict1
-    result.update(dict2)  # Update with dict2
-    return result
+    import json
+    with open(file_path, 'r') as file:
+        return json.load(file)
+
+
+def write_json_file(file_path: str, data: Dict[str, Any]) -> None:
+    """
+    Writes a dictionary to a JSON file.
+
+    Args:
+        file_path (str): The path where the JSON file will be saved.
+        data (Dict[str, Any]): The data to write to the file.
+    """
+    import json
+    with open(file_path, 'w') as file:
+        json.dump(data, file, indent=4)
