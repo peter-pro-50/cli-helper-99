@@ -1,26 +1,27 @@
-import os
 import json
+import os
 
-class Config:
-    def __init__(self, config_file='config.json'):
-        self.config_file = config_file
-        self.settings = self.load_config()
+class ConfigLoader:
+    def __init__(self, default_config_path, user_config_path):
+        self.default_config = self.load_config(default_config_path)
+        self.user_config = self.load_config(user_config_path)
+        self.final_config = self.merge_configs(self.default_config, self.user_config)
 
-    def load_config(self):
-        if not os.path.exists(self.config_file):
+    def load_config(self, path):
+        if not os.path.exists(path):
             return {}
-        with open(self.config_file, 'r') as file:
-            return json.load(file)
+        with open(path, 'r') as config_file:
+            return json.load(config_file)
 
-    def get_setting(self, key, default=None):
-        return self.settings.get(key, default)
+    def merge_configs(self, default, user):
+        config = default.copy()
+        config.update(user)
+        return config
 
-    def set_setting(self, key, value):
-        self.settings[key] = value
-        self.save_config()
+    def get(self, key, default=None):
+        return self.final_config.get(key, default)
 
-    def save_config(self):
-        with open(self.config_file, 'w') as file:
-            json.dump(self.settings, file, indent=4)
-
-config = Config()
+# Example Usage
+if __name__ == '__main__':
+    loader = ConfigLoader('default_config.json', 'user_config.json')
+    print(loader.get('some_setting', 'default_value'))
