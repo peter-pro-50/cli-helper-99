@@ -1,32 +1,21 @@
 import logging
+import logging.handlers
 
-class Logger:
-    def __init__(self, name):
+class LoggerSetup:
+    def __init__(self, name, log_file, level=logging.INFO):
         self.logger = logging.getLogger(name)
-        self.configure_logging()
-
-    def configure_logging(self):
-        handler = logging.StreamHandler()
+        self.logger.setLevel(level)
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+        handler = logging.handlers.RotatingFileHandler(log_file, maxBytes=5*1024*1024, backupCount=5)
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
-        self.logger.setLevel(logging.DEBUG)
 
-    def debug(self, message):
-        self.logger.debug(message)
-
-    def info(self, message):
-        self.logger.info(message)
-
-    def warning(self, message):
-        self.logger.warning(message)
-
-    def error(self, message):
-        self.logger.error(message)
-
-    def critical(self, message):
-        self.logger.critical(message)
+    def get_logger(self):
+        return self.logger
 
 if __name__ == '__main__':
-    log = Logger('MyLogger')
-    log.info('Logger initialized successfully.')
+    log_setup = LoggerSetup('MyLogger', 'app.log')
+    logger = log_setup.get_logger()
+    logger.info('Logger initialized successfully.')
+    logger.error('This is an error message.')
