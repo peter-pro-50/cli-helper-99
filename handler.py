@@ -1,24 +1,29 @@
-import sys
 import json
 
-def validate_input(user_input):
-    if not user_input:
-        raise ValueError('Input cannot be empty')
-    if not user_input.isalnum():
-        raise ValueError('Input must be alphanumeric')
+class DataHandler:
+    def __init__(self, data):
+        self.data = data
 
-    return user_input
+    def process_data(self):
+        return [self._transform(item) for item in self.data]
 
-def main_loop():
-    print('Enter your input:')
-    while True:
-        user_input = input('> ')
-        try:
-            validated_input = validate_input(user_input)
-            print(f'Valid input received: {validated_input}')
-            break
-        except ValueError as e:
-            print(f'Error: {e}. Please try again.')
+    def _transform(self, item):
+        if isinstance(item, dict):
+            return {k: self._clean_value(v) for k, v in item.items()}
+        return self._clean_value(item)
 
+    def _clean_value(self, value):
+        if isinstance(value, str):
+            return value.strip().lower()
+        if isinstance(value, list):
+            return [self._clean_value(v) for v in value]
+        return value
+
+    def to_json(self):
+        return json.dumps(self.process_data(), indent=2)
+
+# Example usage
 if __name__ == '__main__':
-    main_loop()
+    data = [{' Name ': ' Alice ', ' Age ': 30, ' Hobbies ': [' Reading ', ' Traveling ']}, {' Name ': ' Bob ', ' Age ': 25}]
+    handler = DataHandler(data)
+    print(handler.to_json())
