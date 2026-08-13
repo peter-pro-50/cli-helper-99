@@ -1,32 +1,24 @@
 import time
-from functools import wraps
+import requests
 
+class RetryException(Exception):
+    pass
 
-def benchmark(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        start_time = time.perf_counter()
-        result = func(*args, **kwargs)
-        end_time = time.perf_counter()
-        elapsed = end_time - start_time
-        print(f"{func.__name__} executed in {elapsed:.4f} seconds")
-        return result
-    return wrapper
-
-
-@benchmark
-def expensive_computation(n):
-    total = 0
-    for i in range(n):
-        total += sum(j * j for j in range(1000))  # Simulates a heavy computation
-    return total
-
-
-@benchmark
-def optimized_computation(n):
-    return n * (999500000)  # Using the formula for sum of squares directly
-
-
-if __name__ == "__main__":
-    print(expensive_computation(5))
-    print(optimized_computation(5))
+def retry_request(url, max_attempts=5, backoff_factor=0.3):
+    attempts = 0
+    while attempts < max_attempts:
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            return response.json()  # Assuming the response is JSON
+        except requests.exceptions.HTTPError as errh:
+            print(f"Http Error: {errh}")
+        except requests.exceptions.ConnectionError as errc:
+            print(f"Error Connecting: {errc}")
+        except requests.exceptions.Timeout as errt:
+            print(f"Timeout Error: {errt}")
+        except requests.exceptions.RequestException as err:
+            print(f"Something went wrong: {err}")
+        attempts += 1
+        time.sleep(backoff_factor * (2 ** attempts))  # Exponential backoff
+    raise RetryException(f"Failed to fetch {url} after {max_attempts} attempts")
