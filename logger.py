@@ -1,21 +1,32 @@
 import logging
-import logging.handlers
 
-class LoggerSetup:
-    def __init__(self, name, log_file, level=logging.INFO):
+class CustomFormatter(logging.Formatter):
+    def format(self, record):
+        record.msg = f"{record.levelname}: {record.msg}"
+        return super().format(record)
+
+class Logger:
+    def __init__(self, name):
         self.logger = logging.getLogger(name)
-        self.logger.setLevel(level)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-        handler = logging.handlers.RotatingFileHandler(log_file, maxBytes=5*1024*1024, backupCount=5)
+        self.logger.setLevel(logging.DEBUG)
+        handler = logging.StreamHandler()
+        formatter = CustomFormatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
 
-    def get_logger(self):
-        return self.logger
+    def debug(self, msg):
+        self.logger.debug(msg)
 
-if __name__ == '__main__':
-    log_setup = LoggerSetup('MyLogger', 'app.log')
-    logger = log_setup.get_logger()
-    logger.info('Logger initialized successfully.')
-    logger.error('This is an error message.')
+    def info(self, msg):
+        self.logger.info(msg)
+
+    def warning(self, msg):
+        self.logger.warning(msg)
+
+    def error(self, msg):
+        self.logger.error(msg)
+
+    def critical(self, msg):
+        self.logger.critical(msg)
+
+logger = Logger('network_operations_logger')
