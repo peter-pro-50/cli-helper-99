@@ -1,16 +1,25 @@
-import time
-import random
+MAX_CONNECTIONS = 100
+DEFAULT_TIMEOUT = 30
+RETRY_ATTEMPTS = 5
+ERROR_MESSAGES = {
+    'connection_failed': 'Unable to connect, please try again.',
+    'timeout': 'The operation timed out.',
+    'invalid_input': 'The input provided is invalid.',
+    'not_found': 'The requested resource was not found.'
+}
 
-class RetryConfig:
-    def __init__(self, max_attempts=5, backoff_factor=1, jitter=False):
-        self.max_attempts = max_attempts
-        self.backoff_factor = backoff_factor
-        self.jitter = jitter
+STATUS_CODES = {
+    200: 'OK',
+    400: 'Bad Request',
+    404: 'Not Found',
+    500: 'Internal Server Error'
+}
 
-    def backoff_time(self, attempt):
-        backoff = self.backoff_factor * (2 ** attempt)
-        if self.jitter:
-            backoff += random.uniform(0, self.backoff_factor)
-        return backoff
+API_ENDPOINTS = {
+    'user': '/api/v1/user',
+    'post': '/api/v1/post',
+    'comment': '/api/v1/comment'
+}
 
-RETRY_CONFIG = RetryConfig()
+CACHE_EXPIRY = 600  # seconds
+MAX_RETRIES = 3
