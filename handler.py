@@ -1,48 +1,31 @@
-from typing import Any, Dict, List
+import time
+import random
+import requests
 
+class NetworkError(Exception):
+    pass
 
-def handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Processes an incoming request and returns a response.
+class NetworkHandler:
+    def __init__(self, retries=3, delay=2):
+        self.retries = retries
+        self.delay = delay
 
-    Parameters:
-    request (Dict[str, Any]): The incoming request data.
+    def make_request(self, url):
+        for attempt in range(self.retries):
+            try:
+                response = requests.get(url)
+                response.raise_for_status()
+                return response.json()
+            except requests.RequestException as e:
+                if attempt < self.retries - 1:
+                    time.sleep(self.delay * (2 ** attempt))  # Exponential backoff
+                else:
+                    raise NetworkError(f"Failed to retrieve data after {self.retries} attempts: {e}")
 
-    Returns:
-    Dict[str, Any]: A dictionary containing the response data.
-    """
-    response = {'status': 'success', 'data': None}
-    # Simulate processing the request
-    if 'action' in request:
-        if request['action'] == 'get_data':
-            response['data'] = get_data()
-        elif request['action'] == 'set_data':
-            set_data(request.get('data', None))
-            response['data'] = 'Data set successfully'
-        else:
-            response['status'] = 'error'
-            response['message'] = 'Unknown action'
-    else:
-        response['status'] = 'error'
-        response['message'] = 'No action provided'
-    return response
-
-
-def get_data() -> List[str]:
-    """
-    Simulates data retrieval.
-
-    Returns:
-    List[str]: A list of sample data.
-    """
-    return ['item1', 'item2', 'item3']
-
-
-def set_data(data: Any) -> None:
-    """
-    Simulates data setting.
-
-    Parameters:
-    data (Any): The data to be set.
-    """
-    print(f'Setting data: {data}')
+if __name__ == '__main__':
+    handler = NetworkHandler(retries=5, delay=1)
+    try:
+        data = handler.make_request('https://api.example.com/data')
+        print(data)
+    except NetworkError as ne:
+        print(ne)
