@@ -1,32 +1,41 @@
 import logging
 
-class CustomFormatter(logging.Formatter):
-    def format(self, record):
-        record.msg = f"{record.levelname}: {record.msg}"
-        return super().format(record)
-
 class Logger:
-    def __init__(self, name):
+    def __init__(self, name: str):
         self.logger = logging.getLogger(name)
-        self.logger.setLevel(logging.DEBUG)
         handler = logging.StreamHandler()
-        formatter = CustomFormatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
+        self.logger.setLevel(logging.INFO)
 
-    def debug(self, msg):
-        self.logger.debug(msg)
+    def info(self, message: str):
+        self.logger.info(message)
 
-    def info(self, msg):
-        self.logger.info(msg)
+    def error(self, message: str):
+        self.logger.error(message)
 
-    def warning(self, msg):
-        self.logger.warning(msg)
+    def debug(self, message: str):
+        self.logger.debug(message)
 
-    def error(self, msg):
-        self.logger.error(msg)
+    def warning(self, message: str):
+        self.logger.warning(message)
 
-    def critical(self, msg):
-        self.logger.critical(msg)
+if __name__ == '__main__':
+    logger = Logger('CLIHelper99')
+    logger.info('Starting application...')
 
-logger = Logger('network_operations_logger')
+    while True:
+        user_input = input('Enter a command: ')
+        if not user_input.strip():
+            logger.error('Empty input provided.')
+            continue
+        elif len(user_input) > 50:
+            logger.error('Input exceeds maximum length of 50 characters.')
+            continue
+        logger.info(f'Processing input: {user_input}')  
+        # Here, actual processing of input would occur
+        if user_input.lower() == 'exit':
+            logger.info('Exiting application...')
+            break
+        # Assume further processing occurs here
