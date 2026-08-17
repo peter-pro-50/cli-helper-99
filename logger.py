@@ -1,41 +1,29 @@
 import logging
+from logging.handlers import RotatingFileHandler
 
 class Logger:
-    def __init__(self, name: str):
+    def __init__(self, name, level=logging.INFO, max_bytes=5*1024*1024, backup_count=2):
         self.logger = logging.getLogger(name)
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        self.logger.setLevel(level)
+        handler = RotatingFileHandler(f'{name}.log', maxBytes=max_bytes, backupCount=backup_count)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
-        self.logger.setLevel(logging.INFO)
 
-    def info(self, message: str):
+    def log(self, message):
         self.logger.info(message)
 
-    def error(self, message: str):
+    def error(self, message):
         self.logger.error(message)
 
-    def debug(self, message: str):
+    def debug(self, message):
         self.logger.debug(message)
 
-    def warning(self, message: str):
+    def warning(self, message):
         self.logger.warning(message)
 
-if __name__ == '__main__':
-    logger = Logger('CLIHelper99')
-    logger.info('Starting application...')
+    def critical(self, message):
+        self.logger.critical(message)
 
-    while True:
-        user_input = input('Enter a command: ')
-        if not user_input.strip():
-            logger.error('Empty input provided.')
-            continue
-        elif len(user_input) > 50:
-            logger.error('Input exceeds maximum length of 50 characters.')
-            continue
-        logger.info(f'Processing input: {user_input}')  
-        # Here, actual processing of input would occur
-        if user_input.lower() == 'exit':
-            logger.info('Exiting application...')
-            break
-        # Assume further processing occurs here
+logger = Logger('cli_helper')
+logger.log('Logger initialized.')
