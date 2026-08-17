@@ -1,38 +1,48 @@
-from typing import Any, Dict, List, Optional
+from typing import List, Dict, Any
 
-class DataProcessor:
-    """A class to process data in various formats."""
 
-    def __init__(self, data: List[Dict[str, Any]]) -> None:
-        """Initialize with a list of dictionaries containing data."""
-        self.data = data
+def process_data(data: List[Dict[str, Any]]) -> List[str]:
+    """
+    Processes a list of dictionaries and extracts values.
+    
+    Args:
+        data (List[Dict[str, Any]]): A list of dictionaries containing data to process.
+    
+    Returns:
+        List[str]: A list of extracted values as strings.
+    """
+    extracted_values = []
+    for item in data:
+        if 'value' in item:
+            extracted_values.append(str(item['value']))
+    return extracted_values
 
-    def filter_data(self, key: str, value: Any) -> List[Dict[str, Any]]:
-        """Filter data entries by a specific key and value."""
-        return [entry for entry in self.data if entry.get(key) == value]
 
-    def transform_data(self, transformation: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Transform data entries based on provided transformation mapping."""
-        transformed = []
-        for entry in self.data:
-            transformed_entry = {new_key: entry[old_key] for old_key, new_key in transformation.items() if old_key in entry}
-            transformed.append(transformed_entry)
-        return transformed
+def calculate_average(values: List[float]) -> float:
+    """
+    Calculates the average of a list of float values.
+    
+    Args:
+        values (List[float]): A list of float values.
+    
+    Returns:
+        float: The average of the provided values.
+    """
+    if not values:
+        return 0.0
+    total = sum(values)
+    return total / len(values)
 
-    def summarize_data(self) -> Dict[str, int]:
-        """Summarize the data by counting occurrences of each entry."""
-        summary: Dict[str, int] = {}
-        for entry in self.data:
-            key = tuple(entry.items())
-            summary[key] = summary.get(key, 0) + 1
-        return summary
 
-    def get_data(self) -> List[Dict[str, Any]]:
-        """Return the current data set."""
-        return self.data
+def main() -> None:
+    """
+    Main function to execute the processing.
+    """
+    sample_data = [{'value': 10}, {'value': 20}, {'value': 30}]
+    extracted = process_data(sample_data)
+    average = calculate_average([float(v) for v in extracted])
+    print(f'Extracted: {extracted}, Average: {average}')
 
-# Example Usage:
-# processor = DataProcessor([{ 'id': 1, 'value': 'A' }, { 'id': 2, 'value': 'B' }])
-# filtered = processor.filter_data('value', 'A')
-# transformed = processor.transform_data({'id': 'identifier'})
-# summary = processor.summarize_data()
+
+if __name__ == '__main__':
+    main()
