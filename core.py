@@ -1,48 +1,30 @@
-from typing import List, Dict, Any
+import logging
+import os
 
+class AppConfig:
+    def __init__(self, config_file):
+        self.config_file = config_file
+        self.settings = self.load_settings()
 
-def process_data(data: List[Dict[str, Any]]) -> List[str]:
-    """
-    Processes a list of dictionaries and extracts values.
-    
-    Args:
-        data (List[Dict[str, Any]]): A list of dictionaries containing data to process.
-    
-    Returns:
-        List[str]: A list of extracted values as strings.
-    """
-    extracted_values = []
-    for item in data:
-        if 'value' in item:
-            extracted_values.append(str(item['value']))
-    return extracted_values
+    def load_settings(self):
+        if not os.path.exists(self.config_file):
+            raise FileNotFoundError(f'Config file {self.config_file} not found.')
+        with open(self.config_file) as f:
+            return f.read()
 
+class AppLogger:
+    def __init__(self, name):
+        self.logger = logging.getLogger(name)
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        self.logger.addHandler(handler)
+        self.logger.setLevel(logging.INFO)
 
-def calculate_average(values: List[float]) -> float:
-    """
-    Calculates the average of a list of float values.
-    
-    Args:
-        values (List[float]): A list of float values.
-    
-    Returns:
-        float: The average of the provided values.
-    """
-    if not values:
-        return 0.0
-    total = sum(values)
-    return total / len(values)
-
-
-def main() -> None:
-    """
-    Main function to execute the processing.
-    """
-    sample_data = [{'value': 10}, {'value': 20}, {'value': 30}]
-    extracted = process_data(sample_data)
-    average = calculate_average([float(v) for v in extracted])
-    print(f'Extracted: {extracted}, Average: {average}')
-
+def run_application(config_path):
+    config = AppConfig(config_path)
+    app_logger = AppLogger('cli_helper')
+    app_logger.logger.info('Starting application with config: {}'.format(config.settings))
 
 if __name__ == '__main__':
-    main()
+    run_application('config.json')
