@@ -1,30 +1,31 @@
 import time
+import random
 
-class Timer:
-    def __init__(self):
-        self.start = None
+class RetryException(Exception):
+    pass
 
-    def __enter__(self):
-        self.start = time.time()
-        return self
+def retry_network_operation(func, retries=3, delay=2):
+    for attempt in range(retries):
+        try:
+            return func()
+        except Exception as e:
+            if attempt < retries - 1:
+                wait_time = delay * (2 ** attempt) + random.uniform(0, 1)
+                print(f"Attempt {attempt + 1} failed: {e}. Retrying in {wait_time:.2f} seconds...")
+                time.sleep(wait_time)
+            else:
+                raise RetryException(f"All {retries} retries failed: {e}")
 
-    def __exit__(self, *args):
-        duration = time.time() - self.start
-        print(f"Executed in: {duration:.4f} seconds")
+# Example network operation
 
-
-def expensive_operation(n):
-    total = 0
-    for i in range(n):
-        total += i ** 2
-    return total
-
-
-def main(n=1000000):
-    with Timer():
-        result = expensive_operation(n)
-        print(f"Result: {result}")
-
+def example_network_operation():
+    if random.choice([True, False]):
+        raise ConnectionError("Simulated network failure")
+    return "Network operation succeeded!"
 
 if __name__ == '__main__':
-    main()
+    try:
+        result = retry_network_operation(example_network_operation)
+        print(result)
+    except RetryException as e:
+        print(e)
