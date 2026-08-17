@@ -1,22 +1,31 @@
 import re
 
-def validate_input(user_input):
-    if not isinstance(user_input, str):
-        raise ValueError('Input must be a string.')
-    if not user_input:
-        raise ValueError('Input cannot be empty.')
-    if len(user_input) < 3:
-        raise ValueError('Input must be at least 3 characters long.')
-    if not re.match('^[a-zA-Z0-9_]*$', user_input):
-        raise ValueError('Input can only contain alphanumeric characters and underscores.')
-    return True
+def is_valid_email(email: str) -> bool:
+    regex = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+    return re.match(regex, email) is not None
 
-if __name__ == '__main__':
-    while True:
-        user_input = input('Enter your input: ')
-        try:
-            validate_input(user_input)
-            print('Valid input:', user_input)
-            break
-        except ValueError as ve:
-            print('Error:', ve)
+
+def is_valid_phone(phone: str) -> bool:
+    regex = r'^(\+?\d{1,3}[- ]?)?\(?\d{1,4}?\)?[- ]?\d{1,4}[- ]?\d{1,9}$'
+    return re.match(regex, phone) is not None
+
+
+def is_positive_integer(value: str) -> bool:
+    return value.isdigit() and int(value) > 0
+
+
+def is_valid_url(url: str) -> bool:
+    regex = r'^(http|https):\/\/[\w.-]+(\/[\w.-]*)*$'
+    return re.match(regex, url) is not None
+
+
+def is_valid_date(date_string: str) -> bool:
+    regex = r'^(\d{4})-(\d{2})-(\d{2})$'
+    if not re.match(regex, date_string):
+        return False
+    year, month, day = map(int, date_string.split('-'))
+    if month < 1 or month > 12:
+        return False
+    if day < 1 or day > 31:
+        return False
+    return True
