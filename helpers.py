@@ -1,37 +1,31 @@
-import os
 import json
+from typing import Any, Dict, Union
 
-def load_json(file_path):
-    if not os.path.isfile(file_path):
-        raise FileNotFoundError(f"{file_path} not found")
-    with open(file_path, 'r') as file:
-        return json.load(file)
 
-def save_json(data, file_path):
-    with open(file_path, 'w') as file:
-        json.dump(data, file, indent=4)
+def validate_data(data: Dict[str, Any], schema: Dict[str, type]) -> bool:
+    for key, expected_type in schema.items():
+        if key not in data or not isinstance(data[key], expected_type):
+            return False
+    return True
 
-def merge_dicts(dict1, dict2):
-    merged = dict1.copy()
-    merged.update(dict2)
-    return merged
 
-def flatten_list(nested_list):
-    return [item for sublist in nested_list for item in sublist]
+def merge_dicts(*dicts: Dict[str, Any]) -> Dict[str, Any]:
+    result = {}
+    for d in dicts:
+        result.update(d)
+    return result
 
-class JSONHelper:
-    @staticmethod
-    def read(file_path):
-        return load_json(file_path)
 
-    @staticmethod
-    def write(data, file_path):
-        save_json(data, file_path)
+def filter_by_value(data: Dict[str, Any], filter_value: Any) -> Dict[str, Any]:
+    return {k: v for k, v in data.items() if v == filter_value}
 
-    @staticmethod
-    def merge(dict1, dict2):
-        return merge_dicts(dict1, dict2)
 
-    @staticmethod
-    def flatten(nested_list):
-        return flatten_list(nested_list)
+def json_to_dict(json_str: str) -> Union[Dict[str, Any], None]:
+    try:
+        return json.loads(json_str)
+    except json.JSONDecodeError:
+        return None
+
+
+def dict_to_json(data: Dict[str, Any]) -> str:
+    return json.dumps(data, indent=4)
