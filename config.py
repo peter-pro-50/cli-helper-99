@@ -1,28 +1,35 @@
-import os
 import json
+import os
 
-class Config:
-    def __init__(self, config_file='config.json'):
-        self.config_file = config_file
-        self.settings = {}
-        self.load_config()
+class ConfigLoader:
+    def __init__(self, default_config, custom_config_path=None):
+        self.default_config = default_config
+        self.custom_config_path = custom_config_path
+        self.config = self.load_config()
 
     def load_config(self):
-        if os.path.isfile(self.config_file):
-            with open(self.config_file, 'r') as file:
-                self.settings = json.load(file)
-        else:
-            raise ValueError(f'Config file {self.config_file} not found')
+        config = self.default_config.copy()
+        if self.custom_config_path and os.path.exists(self.custom_config_path):
+            with open(self.custom_config_path, 'r') as file:
+                try:
+                    custom_config = json.load(file)
+                    config.update(custom_config)
+                except json.JSONDecodeError:
+                    print('Invalid JSON in custom configuration file.')
+        return config
 
-    def get_setting(self, key, default=None):
-        return self.settings.get(key, default)
+    def get(self, key, default=None):
+        return self.config.get(key, default)
 
-    def set_setting(self, key, value):
-        self.settings[key] = value
-        self.save_config()
-
-    def save_config(self):
-        with open(self.config_file, 'w') as file:
-            json.dump(self.settings, file, indent=4)
-
-config = Config()
+# Example usage
+if __name__ == '__main__':
+    default_config = {
+        'host': 'localhost',
+        'port': 8080,
+        'debug': True
+    }
+    loader = ConfigLoader(default_config, 'custom_config.json')
+    print(loader.get('host'))
+    print(loader.get('port'))
+    print(loader.get('debug'))
+    
