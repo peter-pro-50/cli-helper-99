@@ -1,35 +1,27 @@
-import json
-import os
+import logging
+import logging.handlers
 
-class ConfigLoader:
-    def __init__(self, default_config, custom_config_path=None):
-        self.default_config = default_config
-        self.custom_config_path = custom_config_path
-        self.config = self.load_config()
+# Logger configuration function
 
-    def load_config(self):
-        config = self.default_config.copy()
-        if self.custom_config_path and os.path.exists(self.custom_config_path):
-            with open(self.custom_config_path, 'r') as file:
-                try:
-                    custom_config = json.load(file)
-                    config.update(custom_config)
-                except json.JSONDecodeError:
-                    print('Invalid JSON in custom configuration file.')
-        return config
+def setup_logger(log_file, log_level=logging.INFO):
+    logger = logging.getLogger()
+    logger.setLevel(log_level)
 
-    def get(self, key, default=None):
-        return self.config.get(key, default)
+    # Create a rotating file handler
+    handler = logging.handlers.RotatingFileHandler(
+        log_file, maxBytes=5*1024*1024, backupCount=5
+    )
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
 
-# Example usage
+    # Add the handler to the logger
+    logger.addHandler(handler)
+
+    return logger
+
+# Example of using the logger setup
 if __name__ == '__main__':
-    default_config = {
-        'host': 'localhost',
-        'port': 8080,
-        'debug': True
-    }
-    loader = ConfigLoader(default_config, 'custom_config.json')
-    print(loader.get('host'))
-    print(loader.get('port'))
-    print(loader.get('debug'))
-    
+    logger = setup_logger('app.log')
+    logger.info('Logger is set up successfully!')
+    logger.warning('This is a warning message.')
+    logger.error('This is an error message.')
