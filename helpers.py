@@ -1,31 +1,23 @@
 import json
-from typing import Any, Dict, Union
+from typing import Any, Dict, List, Union
+
+def load_json(file_path: str) -> Union[Dict[str, Any], List[Any]]:
+    with open(file_path, 'r', encoding='utf-8') as file:
+        return json.load(file)
 
 
-def validate_data(data: Dict[str, Any], schema: Dict[str, type]) -> bool:
-    for key, expected_type in schema.items():
-        if key not in data or not isinstance(data[key], expected_type):
-            return False
-    return True
+def save_json(data: Union[Dict[str, Any], List[Any]], file_path: str) -> None:
+    with open(file_path, 'w', encoding='utf-8') as file:
+        json.dump(data, file, ensure_ascii=False, indent=4)
 
 
-def merge_dicts(*dicts: Dict[str, Any]) -> Dict[str, Any]:
-    result = {}
-    for d in dicts:
-        result.update(d)
-    return result
+def merge_dicts(dict1: Dict, dict2: Dict) -> Dict:
+    return {**dict1, **dict2}
 
 
-def filter_by_value(data: Dict[str, Any], filter_value: Any) -> Dict[str, Any]:
-    return {k: v for k, v in data.items() if v == filter_value}
+def flatten_list(nested_list: List[List[Any]]) -> List[Any]:
+    return [item for sublist in nested_list for item in sublist]
 
 
-def json_to_dict(json_str: str) -> Union[Dict[str, Any], None]:
-    try:
-        return json.loads(json_str)
-    except json.JSONDecodeError:
-        return None
-
-
-def dict_to_json(data: Dict[str, Any]) -> str:
-    return json.dumps(data, indent=4)
+def extract_values(data: Dict[str, Any], keys: List[str]) -> Dict[str, Any]:
+    return {key: data[key] for key in keys if key in data}
